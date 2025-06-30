@@ -1,0 +1,2791 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Prompts IA - Prompt Engineering Avancé</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(600px circle at 20% 30%, rgba(14, 165, 233, 0.15), transparent 40%),
+                radial-gradient(800px circle at 80% 20%, rgba(239, 68, 68, 0.15), transparent 40%),
+                radial-gradient(600px circle at 40% 70%, rgba(34, 197, 94, 0.1), transparent 40%),
+                radial-gradient(400px circle at 90% 90%, rgba(168, 85, 247, 0.15), transparent 40%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow:
+                0 25px 50px -12px rgba(0, 0, 0, 0.25),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 50px 0;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 25%, #06b6d4 50%, #10b981 75%, #f59e0b 100%);
+            border-radius: 24px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            font-weight: 900;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #ffffff, #f1f5f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.4em;
+            opacity: 0.95;
+            margin-top: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .api-status-section {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border: 2px solid #22c55e;
+            color: #15803d;
+            padding: 25px;
+            border-radius: 16px;
+            margin: 30px 0;
+            display: none;
+            box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.1);
+        }
+
+        .api-config-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            color: #92400e;
+            padding: 30px;
+            border-radius: 16px;
+            margin: 30px 0;
+            display: none;
+            box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+        }
+
+        .api-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            margin: 10px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        }
+
+        .api-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        }
+
+        .api-key-input input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.95em;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .api-key-input input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        .api-key-input button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .api-key-input button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .api-key-input .clear-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            margin-left: 10px;
+        }
+
+        .api-key-input .clear-btn:hover {
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .generator-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 40px;
+            border-radius: 20px;
+            margin: 40px 0;
+            border-left: 6px solid #3b82f6;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group {
+            margin: 30px 0;
+            transition: all 0.3s ease;
+        }
+
+        .form-group.hidden {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            margin: 0;
+            transition: all 0.3s ease;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .form-group select,
+        .form-group textarea,
+        .form-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+
+        .form-group select:focus,
+        .form-group textarea:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .profession-selection {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 30px;
+            border-radius: 16px;
+            margin: 25px 0;
+            border-left: 5px solid #2563eb;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+        }
+
+        .recommended-frameworks {
+            margin-top: 25px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            backdrop-filter: blur(10px);
+        }
+
+        .framework-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .framework-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .framework-card:hover::before {
+            left: 100%;
+        }
+
+        .framework-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+        }
+
+        .framework-card.selected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #059669 0%, #047857 25%, #0891b2 50%, #0284c7 75%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 30px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(40, 167, 69, 0.4);
+        }
+
+        .generate-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .framework-preview {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #2196f3;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .framework-preview.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .variable-inputs {
+            display: none;
+            margin: 25px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            border: 2px solid #dee2e6;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .variable-inputs.show {
+            display: block;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .variable-input {
+            margin: 20px 0;
+        }
+
+        .variable-input label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .variable-input input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+
+        .variable-input input:focus {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        .result-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            padding: 40px;
+            border-radius: 20px;
+            margin: 40px 0;
+            display: none;
+            border-left: 6px solid #4caf50;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: slideInUp 0.5s ease;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prompt-output {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 16px;
+            border-left: 5px solid #2563eb;
+            margin: 25px 0;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+            line-height: 1.6;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #0891b2 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(8, 145, 178, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(8, 145, 178, 0.3);
+        }
+
+        .btn.warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2);
+        }
+
+        .btn.warning:hover {
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn.success:hover {
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn.primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn.primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            transform: translateY(-2px);
+        }
+
+
+        .status-indicator {
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 0.95em;
+            margin: 15px 0;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #15803d;
+            border: 2px solid #22c55e;
+        }
+
+        .status-error {
+            background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+            color: #dc2626;
+            border: 2px solid #ef4444;
+        }
+
+        .status-loading {
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+            color: #374151;
+            border: 2px solid #9ca3af;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .back-to-module {
+            text-align: center;
+            margin: 50px 0;
+        }
+
+        .back-to-module .btn {
+            margin: 8px;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        .framework-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .stat-number {
+            font-size: 2.8em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .warning-message {
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            color: #dc2626;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border-left: 4px solid #ef4444;
+            font-weight: 600;
+        }
+
+        .tab-navigation {
+            display: flex;
+            background: rgba(248, 250, 252, 0.8);
+            border-radius: 12px;
+            padding: 6px;
+            margin: 25px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid #e5e7eb;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #64748b;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+        }
+        
+        /* Styles pour la configuration Ollama */
+        .ollama-config {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .ollama-config .form-group {
+            margin-bottom: 15px;
+        }
+
+        .ollama-config label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .ollama-config input[type="text"],
+        .ollama-config select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .ollama-config input[type="text"]:focus,
+        .ollama-config select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        #ollamaConfigButtons {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        #ollamaConfigButtons button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        #ollamaConfigButtons button:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Générateur de Prompts IA</h1>
+            <div class="subtitle">Intelligence Artificielle • Prompt Engineering • Innovation</div>
+        </div>
+
+        <div class="framework-stats">
+            <div class="stat-card">
+                <div class="stat-number">21</div>
+                <div>Frameworks Disponibles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4</div>
+                <div>Modèles IA Supportés</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">∞</div>
+                <div>Possibilités Créatives</div>
+            </div>
+        </div>
+
+        <div class="generator-section">
+            <h2>🎯 Générateur de Prompts Professionnel</h2>
+
+            <div class="form-group">
+                <label for="aiModel">🤖 Modèle IA pour Génération :</label>
+                <select id="aiModel" onchange="checkApiKey()">
+                    <option value="openai">OpenAI GPT-4 (Recommandé)</option>
+                    <option value="openai-gpt35">OpenAI GPT-3.5 Turbo</option>
+                    <option value="anthropic">Anthropic Claude 4 Sonnet</option>
+                    <option value="google">Google Gemini</option>
+                    <option value="ollama">Ollama (Local)</option>
+                </select>
+            </div>
+            
+            <div id="apiStatusSection" class="api-status-section">
+                <div id="apiStatus" class="status-indicator status-success">
+                    APIs configurées et prêtes à utiliser
+                </div>
+                <button onclick="modifyApiConfig()" class="btn" style="margin-top: 10px;">
+                    ✏️ Modifier la configuration
+                </button>
+            </div>
+
+            <div id="apiConfigSection" class="api-config-section">
+                <h3>🔑 Configuration API Requise</h3>
+                <p>Pour utiliser ce modèle IA, vous devez configurer votre clé API :</p>
+                <div id="apiLinks"></div>
+                <div id="apiKeyInput" class="api-key-input">
+                    <label for="apiKeyField">Clé API :</label>
+                    <input type="password" id="apiKeyField" placeholder="Collez votre clé API ici...">
+                    <button onclick="saveApiKey()">Sauvegarder la Clé</button>
+                    <button onclick="clearApiKeys()" class="clear-btn">Effacer toutes les clés</button>
+                </div>
+                <div id="ollamaConfigButtons" style="display: none;">
+                    <button onclick="saveOllamaConfig()" class="btn">Sauvegarder Configuration Ollama</button>
+                </div>
+            </div>
+
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="switchTab('manual')">🎨 Choix Manuel</button>
+                <button class="tab-btn" onclick="switchTab('profession')">👔 Par Métier</button>
+            </div>
+
+            <div id="manualTab">
+                <div class="form-group">
+                    <label for="framework">🎨 Choisissez votre Framework :</label>
+                    <select id="framework" onchange="updateFrameworkPreview()">
+                        <option value="">-- Sélectionnez un framework --</option>
+                        <optgroup label="🎯 Frameworks de Base">
+                            <option value="rtf">R-T-F (Rôle - Tâche - Format)</option>
+                            <option value="pao">P-A-O (Problème - Action - Objectif)</option>
+                            <option value="arp">A-R-P (Avant - Résultat - Point)</option>
+                            <option value="care">C-A-R-E (Contexte - Action - Résultat - Exemple)</option>
+                            <option value="riea">R-I-E-A (Rôle - Info - Étapes - Attente)</option>
+                            <option value="aspecct">ASPECCT (Action - Spécificité - Public - Exemples - Contraintes -
+                                Clarifications - Ton)</option>
+                        </optgroup>
+                        <optgroup label="🧠 Frameworks Avancés">
+                            <option value="tot">Tree-of-Thoughts</option>
+                            <option value="cot">Chain-of-Thought</option>
+                            <option value="star">S-T-A-R (Situation - Task - Action - Result)</option>
+                            <option value="ideal">I-D-E-A-L (Identify - Define - Examine - Act - Look)</option>
+                            <option value="stepback">Step-Back Prompting</option>
+                            <option value="sharp">S-H-A-R-P (Situation - Hindrance - Action - Result - Perspective)
+                            </option>
+                            <option value="peel">P-E-E-L (Point - Evidence - Explanation - Link)</option>
+                        </optgroup>
+                        <optgroup label="📊 Frameworks Métier">
+                            <option value="5w1h">5W1H (Who-What-When-Where-Why-How)</option>
+                            <option value="scqa">S-C-Q-A (Situation - Complication - Question - Answer)</option>
+                            <option value="latch">L-A-T-C-H (Location - Alphabet - Time - Category - Hierarchy)</option>
+                        </optgroup>
+                        <optgroup label="⚡ Techniques Rapides">
+                            <option value="expert">Expert Role Prompting</option>
+                            <option value="stepbystep">Step-by-Step Reasoning</option>
+                            <option value="eli5">Explain Like I'm 5</option>
+                            <option value="multiple">Multiple Approaches</option>
+                            <option value="socratic">Socratic Questioning</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+
+            <div id="professionTab" style="display: none;">
+                <div class="profession-selection">
+                    <h4>👔 Sélectionnez votre Métier</h4>
+                    <div class="form-group">
+                        <select id="professionSelect" onchange="showRecommendedFrameworks()">
+                            <option value="">-- Choisissez votre métier --</option>
+                            <option value="marketing">📈 Marketing & Communication</option>
+                            <option value="development">💻 Développement & Tech</option>
+                            <option value="management">👔 Management & Direction</option>
+                            <option value="consulting">🎯 Conseil & Stratégie</option>
+                            <option value="education">📚 Éducation & Formation</option>
+                            <option value="sales">💼 Vente & Commercial</option>
+                            <option value="hr">👥 Ressources Humaines</option>
+                            <option value="finance">💰 Finance & Comptabilité</option>
+                            <option value="creative">🎨 Créatif & Design</option>
+                            <option value="operations">⚙️ Opérations & Logistique</option>
+                        </select>
+                    </div>
+                    <div id="recommendedFrameworks" class="recommended-frameworks" style="display: none;">
+                        <h5>🎯 Frameworks Recommandés pour votre Métier</h5>
+                        <div id="frameworkCards"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="frameworkPreview" class="framework-preview">
+                <!-- Aperçu du framework sélectionné -->
+            </div>
+
+            <div id="variableInputs" class="variable-inputs">
+                <!-- Champs dynamiques selon le framework -->
+            </div>
+
+            <div id="standardFields">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="subject">📝 Sujet Principal :</label>
+                        <textarea id="subject"
+                            placeholder="Décrivez votre demande, problème ou objectif principal..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="context">🌍 Contexte (optionnel) :</label>
+                        <textarea id="context"
+                            placeholder="Informations supplémentaires, contraintes, contexte spécifique..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="audience">👥 Audience Cible :</label>
+                        <input type="text" id="audience"
+                            placeholder="Ex: développeurs seniors, dirigeants PME, étudiants...">
+                    </div>
+                    <div class="form-group">
+                        <label for="tone">🎭 Ton Souhaité :</label>
+                        <select id="tone">
+                            <option value="professionnel">Professionnel</option>
+                            <option value="amical">Amical</option>
+                            <option value="technique">Technique</option>
+                            <option value="créatif">Créatif</option>
+                            <option value="analytique">Analytique</option>
+                            <option value="persuasif">Persuasif</option>
+                            <option value="éducatif">Éducatif</option>
+                            <option value="conversationnel">Conversationnel</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="output">Format de Sortie Souhaité :</label>
+                    <select id="output">
+                        <option value="structured">Réponse structurée avec titres</option>
+                        <option value="bullets">Liste à puces</option>
+                        <option value="numbered">Liste numérotée</option>
+                        <option value="paragraph">Paragraphes narratifs</option>
+                        <option value="table">Format tableau</option>
+                        <option value="json">Format JSON</option>
+                        <option value="markdown">Format Markdown</option>
+                        <option value="stepbystep">Guide étape par étape</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="generate-btn" onclick="generatePromptWithAI()" id="generateBtn">
+                🤖 Générer le Prompt avec IA
+            </button>
+        </div>
+
+        <div id="resultSection" class="result-section">
+            <h3>✨ Votre Prompt Généré par IA</h3>
+            <div id="promptOutput" class="prompt-output"></div>
+            <div class="action-buttons">
+                <button class="btn" onclick="copyPrompt()">Copier</button>
+                <button class="btn success" onclick="savePrompt()">Sauvegarder</button>
+                <button class="btn warning" onclick="regenerateWithDifferentModel()">🔄 Régénérer</button>
+                <button class="btn primary" onclick="testPromptDirectly()" id="realTestBtn">Tester le prompt avec l'IA</button>
+            </div>
+
+            <div id="testResult" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+
+    <script>
+        // Configuration étendue des frameworks
+        const frameworks = {
+            rtf: {
+                name: "R-T-F (Rôle - Tâche - Format)",
+                description: "Framework simple et efficace pour des prompts structurés",
+                variables: ["role", "task", "format"],
+                template: `RÔLE : {role}
+
+TÂCHE : {task}
+
+FORMAT : {format}`,
+                professions: ["marketing", "development", "management", "consulting"]
+            },
+            pao: {
+                name: "P-A-O (Problème - Action - Objectif)",
+                description: "Parfait pour la résolution de problèmes concrets",
+                variables: ["problem", "action", "objective"],
+                template: `PROBLÈME : {problem}
+
+ACTION : {action}
+
+OBJECTIF : {objective}`,
+                professions: ["management", "consulting", "operations"]
+            },
+            arp: {
+                name: "A-R-P (Avant - Résultat - Point)",
+                description: "Idéal pour les transformations et évolutions stratégiques",
+                variables: ["before", "result", "point"],
+                template: `AVANT : {before}
+
+RÉSULTAT : {result}
+
+POINT : {point}`,
+                professions: ["management", "consulting", "sales"]
+            },
+            care: {
+                name: "C-A-R-E (Contexte - Action - Résultat - Exemple)",
+                description: "Framework complet avec exemples concrets",
+                variables: ["context", "action", "result", "example"],
+                template: `CONTEXTE : {context}
+
+ACTION : {action}
+
+RÉSULTAT : {result}
+
+EXEMPLE : {example}`,
+                professions: ["education", "consulting", "hr"]
+            },
+            riea: {
+                name: "R-I-E-A (Rôle - Info - Étapes - Attente)",
+                description: "Pour des systèmes détaillés et processus complexes",
+                variables: ["role", "info", "steps", "expectation"],
+                template: `RÔLE : {role}
+
+INFO : {info}
+
+ÉTAPES : {steps}
+
+ATTENTE : {expectation}`,
+                professions: ["development", "operations", "hr"]
+            },
+            aspecct: {
+                name: "ASPECCT (Action - Spécificité - Public - Exemples - Contraintes - Clarifications - Ton)",
+                description: "Framework ultra-complet pour demandes complexes",
+                variables: ["action", "specificity", "public", "examples", "constraints", "clarifications", "tone"],
+                template: `ACTION : {action}
+
+SPÉCIFICITÉ : {specificity}
+
+PUBLIC : {public}
+
+EXEMPLES : {examples}
+
+CONTRAINTES : {constraints}
+
+CLARIFICATIONS : {clarifications}
+
+TON : {tone}`,
+                professions: ["marketing", "creative", "consulting"]
+            },
+            tot: {
+                name: "Tree-of-Thoughts",
+                description: "Exploration de multiples chemins de raisonnement",
+                variables: ["problem", "approaches"],
+                template: `Problème à résoudre : {problem}
+
+Génère {approaches} approches différentes pour résoudre ce défi.
+Pour chaque approche :
+1. Décris la méthode
+2. Évalue sur 10 : faisabilité, impact, coût
+3. Identifie les risques principaux
+
+Ensuite, développe en détail les 2 meilleures approches.`,
+                professions: ["consulting", "development", "management"]
+            },
+            cot: {
+                name: "Chain-of-Thought",
+                description: "Raisonnement étape par étape structuré",
+                variables: ["problem"],
+                template: `Résolvez ce problème étape par étape :
+
+{problem}
+
+Analysons cela méthodiquement :
+1. D'abord, identifions les éléments clés
+2. Ensuite, décomposons le problème
+3. Puis, résolvons chaque partie
+4. Finalement, synthétisons la réponse
+
+Réflexion :`,
+                professions: ["development", "education", "consulting"]
+            },
+            star: {
+                name: "S-T-A-R (Situation - Task - Action - Result)",
+                description: "Analyse de cas et retours d'expérience",
+                variables: ["situation", "task", "action", "result"],
+                template: `Analysez selon la méthode STAR :
+
+SITUATION : {situation}
+
+TASK : {task}
+
+ACTION : {action}
+
+RESULT : {result}
+
+Maintenant analysez : qu'est-ce qui a bien fonctionné et que feriez-vous différemment ?`,
+                professions: ["hr", "management", "consulting"]
+            },
+            ideal: {
+                name: "I-D-E-A-L (Identify - Define - Examine - Act - Look)",
+                description: "Méthode consulting pour problèmes complexes",
+                variables: ["identify", "define", "examine", "act", "look"],
+                template: `Résolvez ce problème business avec I-D-E-A-L :
+
+IDENTIFY : {identify}
+
+DEFINE : {define}
+
+EXAMINE : {examine}
+
+ACT : {act}
+
+LOOK : {look}`,
+                professions: ["consulting", "management", "finance"]
+            },
+            stepback: {
+                name: "Step-Back Prompting",
+                description: "Résolution par abstraction puis application",
+                variables: ["general_question", "specific_question"],
+                template: `D'abord, step-back : {general_question}
+
+[Attendez la réponse sur les principes généraux]
+
+Maintenant, en appliquant ces principes à mon cas spécifique : {specific_question}`,
+                professions: ["education", "consulting", "development"]
+            },
+            sharp: {
+                name: "S-H-A-R-P (Situation - Hindrance - Action - Result - Perspective)",
+                description: "Analyse d'incident ou retour d'expérience détaillé",
+                variables: ["situation", "hindrance", "action", "result", "perspective"],
+                template: `SITUATION : {situation}
+
+HINDRANCE : {hindrance}
+
+ACTION : {action}
+
+RESULT : {result}
+
+PERSPECTIVE : {perspective}`,
+                professions: ["operations", "management", "hr"]
+            },
+            peel: {
+                name: "P-E-E-L (Point - Evidence - Explanation - Link)",
+                description: "Framework argumentatif pour l'éducation et la persuasion",
+                variables: ["point", "evidence", "explanation", "link"],
+                template: `POINT : {point}
+
+EVIDENCE : {evidence}
+
+EXPLANATION : {explanation}
+
+LINK : {link}`,
+                professions: ["education", "sales", "marketing"]
+            },
+            "5w1h": {
+                name: "5W1H (Who-What-When-Where-Why-How)",
+                description: "Analyse journalistique complète pour brainstorming et investigation",
+                variables: ["who", "what", "when", "where", "why", "how"],
+                template: `WHO : {who}
+
+WHAT : {what}
+
+WHEN : {when}
+
+WHERE : {where}
+
+WHY : {why}
+
+HOW : {how}`,
+                professions: ["marketing", "consulting", "operations"]
+            },
+            scqa: {
+                name: "S-C-Q-A (Situation - Complication - Question - Answer)",
+                description: "Framework consulting McKinsey pour structurer une présentation",
+                variables: ["situation", "complication", "question", "answer"],
+                template: `SITUATION : {situation}
+
+COMPLICATION : {complication}
+
+QUESTION : {question}
+
+ANSWER : {answer}`,
+                professions: ["consulting", "management", "finance"]
+            },
+            latch: {
+                name: "L-A-T-C-H (Location - Alphabet - Time - Category - Hierarchy)",
+                description: "Organisation et présentation d'information complexe",
+                variables: ["location", "alphabet", "time", "category", "hierarchy"],
+                template: `LOCATION : {location}
+
+ALPHABET : {alphabet}
+
+TIME : {time}
+
+CATEGORY : {category}
+
+HIERARCHY : {hierarchy}`,
+                professions: ["creative", "education", "operations"]
+            },
+            expert: {
+                name: "Expert Role Prompting",
+                description: "Perspective d'expert spécialisé",
+                variables: ["expertise", "experience"],
+                template: `Tu es un expert en {expertise} avec {experience} années d'expérience.
+
+En tant que spécialiste reconnu dans ce domaine, réponds à cette question avec ton expertise approfondie :`,
+                professions: ["consulting", "development", "finance"]
+            },
+            stepbystep: {
+                name: "Step-by-Step Reasoning",
+                description: "Raisonnement simple et méthodique",
+                variables: [],
+                template: `Analysons cela étape par étape.
+
+Prenons une approche méthodique pour résoudre ce problème :`,
+                professions: ["education", "development", "operations"]
+            },
+            eli5: {
+                name: "Explain Like I'm 5",
+                description: "Simplification maximale et vulgarisation",
+                variables: [],
+                template: `Explique-moi cela comme si j'avais 5 ans.
+
+Utilise des mots simples, des analogies et des exemples concrets que même un enfant pourrait comprendre :`,
+                professions: ["education", "marketing", "hr"]
+            },
+            multiple: {
+                name: "Multiple Approaches",
+                description: "Génération de solutions diversifiées",
+                variables: ["number"],
+                template: `Donne-moi {number} approches différentes pour résoudre ce défi.
+
+Pour chaque approche, explique :
+- La méthode principale
+- Les avantages
+- Les inconvénients
+- Un exemple concret d'application`,
+                professions: ["consulting", "creative", "management"]
+            },
+            socratic: {
+                name: "Socratic Questioning",
+                description: "Méthode socratique pour l'apprentissage par questionnement",
+                variables: ["topic"],
+                template: `Utilise la méthode socratique pour m'enseigner : {topic}
+
+Au lieu de donner des réponses directes, guide-moi avec des questions qui m'amèneront à découvrir les concepts par moi-même.
+
+Commence par une question fondamentale :`,
+                professions: ["education", "consulting", "hr"]
+            }
+        };
+
+        // Configuration des APIs
+        const apiConfig = {
+            openai: {
+                name: "OpenAI",
+                url: "https://platform.openai.com/api-keys",
+                models: ["GPT-4", "GPT-3.5 Turbo"]
+            },
+            anthropic: {
+                name: "Anthropic",
+                url: "https://console.anthropic.com/account/keys",
+                models: ["Claude 4 Sonnet"]
+            },
+            google: {
+                name: "Google",
+                url: "https://makersuite.google.com/app/apikey",
+                models: ["Gemini"]
+            },
+            ollama: {
+                name: "Ollama",
+                url: "http://localhost:11434",
+                models: [],
+                requiresUrl: true
+            }
+        };
+
+        // Frameworks recommandés par métier
+        const professionFrameworks = {
+            marketing: ["rtf", "aspecct", "peel", "5w1h", "eli5"],
+            development: ["riea", "tot", "cot", "stepbystep", "expert"],
+            management: ["pao", "arp", "star", "ideal", "multiple"],
+            consulting: ["scqa", "ideal", "tot", "expert", "stepback"],
+            education: ["care", "eli5", "stepbystep", "socratic", "peel"],
+            sales: ["arp", "peel", "star", "rtf", "eli5"],
+            hr: ["star", "care", "sharp", "socratic", "riea"],
+            finance: ["ideal", "scqa", "expert", "stepbystep", "5w1h"],
+            creative: ["aspecct", "multiple", "latch", "eli5", "rtf"],
+            operations: ["sharp", "riea", "stepbystep", "5w1h", "latch"]
+        };
+
+        // Variables globales
+        let currentFramework = null;
+        let apiKeys = {};
+        let currentTab = 'manual';
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function () {
+            loadApiKeys();
+            
+            // Restaurer le dernier modèle sélectionné
+            const lastModel = localStorage.getItem('promptgen_last_model');
+            if (lastModel) {
+                const modelSelect = document.getElementById('aiModel');
+                if (modelSelect) {
+                    // Vérifier si l'option existe
+                    const options = Array.from(modelSelect.options);
+                    if (options.some(opt => opt.value === lastModel)) {
+                        modelSelect.value = lastModel;
+                    }
+                }
+            }
+            
+            checkApiKey();
+        });
+
+        // Chargement des clés API depuis le localStorage (simulation .env)
+        function loadApiKeys() {
+            try {
+                const saved = localStorage.getItem('promptgen_api_keys');
+                if (saved) {
+                    apiKeys = JSON.parse(saved);
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des clés API:', error);
+            }
+        }
+
+        // Sauvegarde des clés API
+        function saveApiKeys() {
+            try {
+                localStorage.setItem('promptgen_api_keys', JSON.stringify(apiKeys));
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde des clés API:', error);
+            }
+        }
+
+        // Vérification de la clé API pour le modèle sélectionné
+        function checkApiKey() {
+            const aiModel = document.getElementById('aiModel').value;
+            const modelProvider = aiModel.split('-')[0]; // openai, anthropic, google, ollama
+
+            // Sauvegarder le modèle sélectionné
+            localStorage.setItem('promptgen_last_model', aiModel);
+
+            const apiStatusSection = document.getElementById('apiStatusSection');
+            const apiConfigSection = document.getElementById('apiConfigSection');
+
+            if (modelProvider === 'ollama') {
+                // Configuration spéciale pour Ollama
+                const ollamaConfig = apiKeys[modelProvider];
+                if (ollamaConfig && ollamaConfig.url && ollamaConfig.selectedModel) {
+                    apiStatusSection.style.display = 'block';
+                    apiConfigSection.style.display = 'none';
+                    document.getElementById('generateBtn').disabled = false;
+                    document.getElementById('apiStatus').innerHTML = `Ollama configuré : ${ollamaConfig.selectedModel} sur ${ollamaConfig.url}`;
+                } else {
+                    apiStatusSection.style.display = 'none';
+                    apiConfigSection.style.display = 'block';
+                    
+                    document.getElementById('apiLinks').innerHTML = `
+                        <div class="ollama-config">
+                            <p>Configurez votre instance Ollama locale :</p>
+                            <div class="form-group">
+                                <label for="ollamaUrl">URL Ollama :</label>
+                                <input type="text" id="ollamaUrl" placeholder="http://localhost:11434" value="${ollamaConfig?.url || 'http://localhost:11434'}">
+                            </div>
+                            <div class="form-group">
+                                <label for="ollamaModel">Modèle Ollama :</label>
+                                <select id="ollamaModel">
+                                    <option value="">-- Choisir un modèle --</option>
+                                </select>
+                                <button onclick="loadOllamaModels()" class="btn">🔄 Charger les modèles</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Cacher les champs de clé API standard pour Ollama
+                    document.getElementById('apiKeyInput').style.display = 'none';
+                    document.getElementById('ollamaConfigButtons').style.display = 'block';
+                    
+                    document.getElementById('generateBtn').disabled = true;
+                    
+                    // Charger automatiquement les modèles si une URL est définie
+                    if (ollamaConfig?.url || !ollamaConfig) {
+                        // Utiliser setTimeout pour s'assurer que le DOM est prêt
+                        setTimeout(() => {
+                            loadOllamaModels(ollamaConfig?.selectedModel);
+                        }, 100);
+                    }
+                }
+            } else if (apiKeys[modelProvider]) {
+                // Clé API disponible
+                apiStatusSection.style.display = 'block';
+                apiConfigSection.style.display = 'none';
+                document.getElementById('generateBtn').disabled = false;
+                document.getElementById('apiStatus').innerHTML = 'APIs configurées et prêtes à utiliser';
+            } else {
+                // Clé API manquante
+                apiStatusSection.style.display = 'none';
+                apiConfigSection.style.display = 'block';
+
+                const config = apiConfig[modelProvider];
+                document.getElementById('apiLinks').innerHTML = `
+                    <p>Obtenez votre clé API ${config.name} :</p>
+                    <a href="${config.url}" target="_blank" class="api-link">
+                        🔗 Créer une clé API ${config.name}
+                    </a>
+                `;
+
+                // Réafficher les champs de clé API standard
+                document.getElementById('apiKeyInput').style.display = 'block';
+                document.getElementById('ollamaConfigButtons').style.display = 'none';
+
+                document.getElementById('generateBtn').disabled = true;
+            }
+        }
+
+        // Sauvegarde d'une nouvelle clé API
+        function saveApiKey() {
+            const aiModel = document.getElementById('aiModel').value;
+            const modelProvider = aiModel.split('-')[0];
+            
+            // Si c'est Ollama, utiliser saveOllamaConfig à la place
+            if (modelProvider === 'ollama') {
+                saveOllamaConfig();
+                return;
+            }
+            
+            const apiKey = document.getElementById('apiKeyField').value.trim();
+
+            if (!apiKey) {
+                alert('Veuillez saisir une clé API valide');
+                return;
+            }
+
+            // Validation basique de la clé
+            const validations = {
+                openai: key => key.startsWith('sk-'),
+                anthropic: key => key.startsWith('sk-ant-'),
+                google: key => key.startsWith('AIza'),
+                ollama: key => true // Ollama n'a pas besoin de clé API
+            };
+
+            if (validations[modelProvider] && !validations[modelProvider](apiKey)) {
+                alert('Format de clé API invalide pour ' + apiConfig[modelProvider].name);
+                return;
+            }
+
+            // Sauvegarde
+            apiKeys[modelProvider] = apiKey;
+            saveApiKeys();
+
+            // Interface
+            document.getElementById('apiKeyField').value = '';
+            checkApiKey();
+
+            alert('Clé API sauvegardée avec succès !');
+        }
+
+        // Effacement de toutes les clés API
+        function clearApiKeys() {
+            if (confirm('⚠️ Êtes-vous sûr de vouloir effacer toutes les clés API sauvegardées ? Cette action est irréversible.')) {
+                try {
+                    // Vider l'objet apiKeys
+                    apiKeys = {};
+                    
+                    // Supprimer du localStorage
+                    localStorage.removeItem('promptgen_api_keys');
+                    
+                    // Vider le champ de saisie
+                    document.getElementById('apiKeyField').value = '';
+                    
+                    // Mettre à jour l'interface
+                    checkApiKey();
+                    
+                    alert('Toutes les clés API ont été effacées avec succès !');
+                } catch (error) {
+                    console.error('Erreur lors de l\'effacement des clés API:', error);
+                    alert('Erreur lors de l\'effacement des clés API');
+                }
+            }
+        }
+
+        // Charger les modèles disponibles depuis Ollama
+        async function loadOllamaModels(selectedModel = null) {
+            const ollamaUrlElement = document.getElementById('ollamaUrl');
+            if (!ollamaUrlElement) {
+                // Si l'élément n'existe pas encore, attendre un peu et réessayer
+                setTimeout(() => loadOllamaModels(selectedModel), 100);
+                return;
+            }
+            
+            const ollamaUrl = ollamaUrlElement.value.trim();
+            if (!ollamaUrl) {
+                console.log('URL Ollama non définie');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${ollamaUrl}/api/tags`);
+                if (!response.ok) {
+                    throw new Error('Impossible de se connecter à Ollama');
+                }
+
+                const data = await response.json();
+                const models = data.models || [];
+                
+                const modelSelect = document.getElementById('ollamaModel');
+                if (!modelSelect) {
+                    console.error('Element ollamaModel non trouvé');
+                    return;
+                }
+                
+                modelSelect.innerHTML = '<option value="">-- Choisir un modèle --</option>';
+                
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = `${model.name} (${formatSize(model.size)})`;
+                    if (selectedModel && model.name === selectedModel) {
+                        option.selected = true;
+                    }
+                    modelSelect.appendChild(option);
+                });
+
+                if (models.length === 0) {
+                    // Ne pas afficher d'alerte au chargement automatique
+                    console.log('Aucun modèle Ollama trouvé');
+                } else {
+                    // Afficher le bouton de sauvegarde
+                    document.getElementById('ollamaConfigButtons').style.display = 'block';
+                    
+                    // Si un modèle était présélectionné et existe toujours, activer le bouton de génération
+                    if (selectedModel && models.some(m => m.name === selectedModel)) {
+                        // Sauvegarder automatiquement si tout est configuré
+                        const ollamaConfig = apiKeys['ollama'];
+                        if (ollamaConfig && ollamaConfig.url === ollamaUrl && ollamaConfig.selectedModel === selectedModel) {
+                            checkApiKey();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error(`Erreur lors du chargement des modèles : ${error.message}`);
+                // Ne pas afficher d'alerte au chargement automatique
+            }
+        }
+
+        // Sauvegarder la configuration Ollama
+        function saveOllamaConfig() {
+            const ollamaUrl = document.getElementById('ollamaUrl').value.trim();
+            const selectedModel = document.getElementById('ollamaModel').value;
+
+            if (!ollamaUrl || !selectedModel) {
+                alert('Veuillez sélectionner une URL et un modèle');
+                return;
+            }
+
+            apiKeys['ollama'] = {
+                url: ollamaUrl,
+                selectedModel: selectedModel
+            };
+
+            saveApiKeys();
+            checkApiKey();
+        }
+
+        // Formater la taille des modèles
+        function formatSize(bytes) {
+            if (bytes < 1024 * 1024 * 1024) {
+                return (bytes / (1024 * 1024)).toFixed(0) + ' MB';
+            }
+            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+        }
+
+        // Modifier la configuration API
+        function modifyApiConfig() {
+            const aiModel = document.getElementById('aiModel').value;
+            const modelProvider = aiModel.split('-')[0];
+            
+            // Supprimer temporairement la configuration pour forcer l'affichage du formulaire
+            if (modelProvider === 'ollama') {
+                // Pour Ollama, on garde l'URL mais on supprime le modèle sélectionné
+                if (apiKeys['ollama']) {
+                    const ollamaUrl = apiKeys['ollama'].url;
+                    apiKeys['ollama'] = { url: ollamaUrl };
+                    saveApiKeys();
+                }
+            } else {
+                // Pour les autres APIs, supprimer complètement la clé
+                delete apiKeys[modelProvider];
+                saveApiKeys();
+            }
+            
+            // Réafficher le formulaire de configuration
+            checkApiKey();
+        }
+
+        // Gestion des onglets
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Mise à jour des boutons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Affichage des sections
+            if (tab === 'manual') {
+                document.getElementById('manualTab').style.display = 'block';
+                document.getElementById('professionTab').style.display = 'none';
+            } else {
+                document.getElementById('manualTab').style.display = 'none';
+                document.getElementById('professionTab').style.display = 'block';
+            }
+
+            // Reset des sélections
+            resetFrameworkSelection();
+        }
+
+        // Affichage des frameworks recommandés par métier
+        function showRecommendedFrameworks() {
+            const profession = document.getElementById('professionSelect').value;
+            const container = document.getElementById('recommendedFrameworks');
+            const cardsContainer = document.getElementById('frameworkCards');
+
+            if (!profession) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+
+            const recommended = professionFrameworks[profession] || [];
+            let cardsHtml = '';
+
+            recommended.forEach(frameworkId => {
+                const framework = frameworks[frameworkId];
+                if (framework) {
+                    cardsHtml += `
+                        <div class="framework-card" onclick="selectFrameworkCard('${frameworkId}', this)">
+                            <h6>${framework.name}</h6>
+                            <p>${framework.description}</p>
+                        </div>
+                    `;
+                }
+            });
+
+            cardsContainer.innerHTML = cardsHtml;
+        }
+
+        // Sélection d'un framework via carte
+        function selectFrameworkCard(frameworkId, cardElement) {
+            // Désélection des autres cartes
+            document.querySelectorAll('.framework-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Sélection de la carte actuelle
+            cardElement.classList.add('selected');
+
+            // Mise à jour du framework actuel
+            currentFramework = frameworks[frameworkId];
+            updateFrameworkPreview(frameworkId);
+        }
+
+        // Reset de la sélection des frameworks
+        function resetFrameworkSelection() {
+            document.getElementById('framework').value = '';
+            document.getElementById('professionSelect').value = '';
+            document.getElementById('recommendedFrameworks').style.display = 'none';
+            document.querySelectorAll('.framework-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Reset de l'aperçu
+            document.getElementById('frameworkPreview').style.display = 'none';
+            document.getElementById('variableInputs').style.display = 'none';
+            document.getElementById('standardFields').style.display = 'block';
+
+            currentFramework = null;
+        }
+
+        // Mise à jour de l'aperçu du framework
+        function updateFrameworkPreview(frameworkId = null) {
+            const selectedFramework = frameworkId || document.getElementById('framework').value;
+            const previewDiv = document.getElementById('frameworkPreview');
+            const variableInputsDiv = document.getElementById('variableInputs');
+            const standardFieldsDiv = document.getElementById('standardFields');
+
+            if (selectedFramework && frameworks[selectedFramework]) {
+                currentFramework = frameworks[selectedFramework];
+
+                // Affichage de l'aperçu
+                previewDiv.style.display = 'block';
+                previewDiv.classList.add('show');
+                previewDiv.innerHTML = `
+                    <h4>${currentFramework.name}</h4>
+                    <p><em>${currentFramework.description}</em></p>
+                    <pre style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #28a745; margin-top: 15px; font-family: 'Monaco', monospace;">${currentFramework.template}</pre>
+                `;
+
+                // Frameworks avec variables spécifiques qui remplacent les champs standards
+                const frameworksWithSpecialFields = ['rtf', 'pao', 'arp', 'care', 'riea', 'aspecct', 'star', 'ideal', 'sharp', 'peel', '5w1h', 'scqa', 'latch'];
+                const hasSpecialFields = frameworksWithSpecialFields.includes(selectedFramework);
+
+                // Génération des champs de variables
+                if (currentFramework.variables && currentFramework.variables.length > 0) {
+                    variableInputsDiv.style.display = 'block';
+                    variableInputsDiv.classList.add('show');
+
+                    let variableHTML = '<h4>🎯 Variables Spécifiques du Framework :</h4>';
+
+                    if (hasSpecialFields) {
+                        variableHTML += '<div class="warning-message">⚠️ <strong>Important :</strong> Pour ce framework, utilisez les champs ci-dessous au lieu des champs standards</div>';
+                        standardFieldsDiv.style.display = 'none';
+                    } else {
+                        standardFieldsDiv.style.display = 'block';
+                    }
+
+                    currentFramework.variables.forEach(variable => {
+                        const label = getVariableLabel(variable);
+                        const placeholder = getVariablePlaceholder(variable);
+                        variableHTML += `
+                            <div class="variable-input">
+                                <label for="var_${variable}">${label} :</label>
+                                <input type="text" id="var_${variable}" placeholder="${placeholder}">
+                            </div>
+                        `;
+                    });
+
+                    variableInputsDiv.innerHTML = variableHTML;
+                } else {
+                    variableInputsDiv.style.display = 'none';
+                    variableInputsDiv.classList.remove('show');
+                    standardFieldsDiv.style.display = 'block';
+                }
+
+            } else {
+                // Aucun framework sélectionné
+                previewDiv.style.display = 'none';
+                previewDiv.classList.remove('show');
+                variableInputsDiv.style.display = 'none';
+                variableInputsDiv.classList.remove('show');
+                standardFieldsDiv.style.display = 'block';
+                currentFramework = null;
+            }
+        }
+
+        // Labels pour les variables (fonction existante - inchangée)
+        function getVariableLabel(variable) {
+            const labels = {
+                role: '👤 Rôle/Expertise',
+                task: '🎯 Tâche à accomplir',
+                format: 'Format de sortie',
+                problem: '❗ Problème à résoudre',
+                action: '⚡ Action demandée',
+                objective: '🎯 Objectif final',
+                before: '📍 Situation actuelle',
+                result: '🏆 Résultat souhaité',
+                point: '🔑 Point clé demandé',
+                context: '🌍 Contexte',
+                example: '💡 Exemple souhaité',
+                info: 'ℹ️ Informations',
+                steps: 'Étapes demandées',
+                expectation: '🎯 Attente',
+                specificity: '🔍 Spécificité',
+                public: '👥 Public cible',
+                examples: '💡 Exemples',
+                constraints: '⚠️ Contraintes',
+                clarifications: '💬 Clarifications',
+                tone: '🎭 Ton',
+                approaches: '🔢 Nombre d\'approches',
+                situation: '📍 Situation',
+                identify: '🔍 Problème identifié',
+                define: 'Objectifs définis',
+                examine: '🧐 Alternatives examinées',
+                act: '⚡ Plan d\'action',
+                look: '👀 Suivi et évaluation',
+                general_question: '❓ Question générale',
+                specific_question: '🎯 Question spécifique',
+                expertise: '🎓 Domaine d\'expertise',
+                experience: '⏱️ Années d\'expérience',
+                number: '🔢 Nombre de solutions',
+                hindrance: '🚧 Obstacle/Difficulté',
+                perspective: '👁️ Perspective/Apprentissage',
+                evidence: '📊 Preuves/Données',
+                explanation: '💭 Explication',
+                link: '🔗 Lien/Transition',
+                who: '👤 Qui',
+                what: '❓ Quoi',
+                when: '⏰ Quand',
+                where: '📍 Où',
+                why: '🤔 Pourquoi',
+                how: '🔧 Comment',
+                complication: '⚠️ Complication',
+                question: '❓ Question clé',
+                answer: 'Réponse',
+                location: '🗺️ Localisation',
+                alphabet: '🔤 Ordre alphabétique',
+                time: '⏰ Chronologie',
+                category: '📂 Catégorie',
+                hierarchy: '📊 Hiérarchie',
+                topic: '📚 Sujet d\'apprentissage',
+                character: '🎭 Personnage/Rôle',
+                request: 'Demande',
+                adjustments: '⚙️ Ajustements',
+                extras: '✨ Extras',
+                retrieve: '🔍 Récupérer',
+                augment: '📈 Augmenter',
+                generate: '🎯 Générer',
+                observation: '👁️ Observation',
+                thought: '💭 Réflexion',
+                initial_context: '🌱 Contexte initial',
+                progression_steps: '📈 Étapes de progression',
+                background: '📖 Contexte',
+                reach: '📊 Portée',
+                confidence: '💪 Confiance',
+                effort: '⚡ Effort',
+                strengths: '💪 Forces',
+                weaknesses: '⚠️ Faiblesses',
+                opportunities: '🌟 Opportunités',
+                threats: '🚨 Menaces',
+                remember: '🧠 Se souvenir',
+                understand: '💡 Comprendre',
+                apply: '⚙️ Appliquer',
+                analyze: '🔬 Analyser',
+                evaluate: '⚖️ Évaluer',
+                create: '🎨 Créer',
+                reaction: '😊 Réaction',
+                learning: '📚 Apprentissage',
+                behavior: '🔄 Comportement',
+                results: '🎯 Résultats',
+                design: '🎨 Conception',
+                develop: '🛠️ Développement',
+                implement: 'Implémentation',
+                substitution: '🔄 Substitution',
+                augmentation: '📈 Augmentation',
+                modification: '⚙️ Modification',
+                redefinition: '🎯 Redéfinition',
+                solution: '💡 Solution',
+                key_metrics: '📊 Métriques clés',
+                value_proposition: '💎 Proposition de valeur',
+                unfair_advantage: 'Avantage concurrentiel',
+                objective: '🎯 Objectif',
+                key_result_1: '🔑 Résultat clé 1',
+                key_result_2: '🔑 Résultat clé 2',
+                key_result_3: '🔑 Résultat clé 3',
+                specific: '🎯 Spécifique',
+                measurable: '📏 Mesurable',
+                achievable: 'Atteignable',
+                relevant: '🎯 Pertinent',
+                time_bound: '⏰ Temporel',
+                political: '🏛️ Politique',
+                economic: '💰 Économique',
+                social: '👥 Social',
+                technological: '💻 Technologique',
+                environmental: '🌍 Environnemental',
+                legal: '⚖️ Légal',
+                competitive_rivalry: '⚔️ Rivalité concurrentielle',
+                supplier_power: '🏭 Pouvoir fournisseurs',
+                buyer_power: '💰 Pouvoir acheteurs',
+                threat_of_substitution: '🔄 Menace substituts',
+                threat_of_new_entry: '🚪 Menace nouveaux entrants',
+                key_partners: '🤝 Partenaires clés',
+                key_activities: '⚙️ Activités clés',
+                value_propositions: '💎 Propositions de valeur',
+                customer_relationships: '❤️ Relations clients',
+                customer_segments: '👥 Segments clients',
+                population: '👥 Population',
+                intervention: '💊 Intervention',
+                comparison: '⚖️ Comparaison',
+                outcome: '🎯 Résultat',
+                identification: '🔍 Identification',
+                screening: '🔎 Criblage',
+                eligibility: 'Éligibilité',
+                included: 'Inclus',
+                introduction: '📖 Introduction',
+                methods: '🔬 Méthodes',
+                analysis: '📊 Analyse',
+                discussion: '💬 Discussion',
+                hypothesis: '🧪 Hypothèse',
+                test_method: '🔬 Méthode de test',
+                expected_result: '🎯 Résultat attendu',
+                validation_criteria: 'Critères validation',
+                source_domain: '🏠 Domaine source',
+                target_domain: '🎯 Domaine cible',
+                mapping: '🔗 Correspondance',
+                position: '📍 Position',
+                counterarguments: '⚔️ Contre-arguments',
+                white_facts: '⚪ Faits',
+                red_emotions: '🔴 Émotions',
+                black_caution: '⚫ Prudence',
+                yellow_optimism: '🟡 Optimisme',
+                green_creativity: '🟢 Créativité',
+                blue_process: '🔵 Processus',
+                substitute: '🔄 Substituer',
+                combine: '🤝 Combiner',
+                adapt: '🔧 Adapter',
+                modify: '⚙️ Modifier',
+                put_to_other_uses: '♻️ Autres usages',
+                eliminate: 'Éliminer',
+                reverse: '🔄 Inverser',
+                challenge: '🎯 Défi',
+                criteria: '📏 Critères',
+                time_limit: '⏰ Limite temps',
+                empathize: '❤️ Empathie',
+                ideate: '💡 Idéation',
+                prototype: '🛠️ Prototype',
+                test: '🧪 Test',
+                discover: '🔍 Découvrir',
+                deliver: 'Livrer'
+            };
+            return labels[variable] || variable.charAt(0).toUpperCase() + variable.slice(1);
+        }
+
+        // Placeholders pour les variables (fonction existante - inchangée mais étendue)
+        function getVariablePlaceholder(variable) {
+            const placeholders = {
+                role: 'Ex: Expert en marketing digital, Consultant senior...',
+                task: 'Ex: Créer une stratégie, Analyser les données...',
+                format: 'Ex: Liste à puces, Rapport structuré, Tableau...',
+                problem: 'Ex: Baisse des ventes, Équipe démotivée...',
+                action: 'Ex: Proposer des solutions, Créer un plan...',
+                objective: 'Ex: Augmenter les revenus de 30%, Améliorer la satisfaction...',
+                before: 'Ex: Startup 5 personnes, CA 100K€...',
+                result: 'Ex: Entreprise structurée, CA 1M€...',
+                point: 'Ex: Plan de croissance, Stratégie de recrutement...',
+                context: 'Ex: Secteur tech, Budget limité, Équipe junior...',
+                example: 'Ex: Cas d\'entreprises similaires, Benchmarks...',
+                info: 'Ex: Budget 50K€, Équipe de 3 personnes...',
+                steps: 'Ex: Étapes détaillées, Process complet...',
+                expectation: 'Ex: Plan actionnable, ROI calculé...',
+                specificity: 'Ex: Focus B2B, Marché français...',
+                public: 'Ex: Dirigeants PME, Développeurs seniors...',
+                examples: 'Ex: Airbnb, Uber, Tesla...',
+                constraints: 'Ex: Budget 100K€, Délai 6 mois...',
+                clarifications: 'Ex: Priorité innovation, Éviter le risque...',
+                tone: 'Ex: Professionnel, Créatif, Technique...',
+                approaches: 'Ex: 3, 5, 7...',
+                situation: 'Ex: Projet en retard, Budget dépassé...',
+                identify: 'Ex: Churn rate élevé, Coûts excessifs...',
+                define: 'Ex: Réduire le churn de 50%, ROI positif...',
+                examine: 'Ex: 5 solutions possibles...',
+                act: 'Ex: Plan en 3 phases...',
+                look: 'Ex: KPIs mensuels, reporting...',
+                general_question: 'Ex: Quels sont les principes de...',
+                specific_question: 'Ex: Comment appliquer à mon cas...',
+                expertise: 'Ex: marketing digital, développement web...',
+                experience: 'Ex: 10, 15, 20...',
+                number: 'Ex: 3, 5, 7...',
+                hindrance: 'Ex: Manque de budget, Résistance au changement...',
+                perspective: 'Ex: Leçons apprises, Améliorations futures...',
+                evidence: 'Ex: Statistiques, Études de cas...',
+                explanation: 'Ex: Analyse des causes, Mécanismes...',
+                link: 'Ex: Donc, Par conséquent, En conclusion...',
+                who: 'Ex: L\'équipe marketing, Les clients...',
+                what: 'Ex: Nouvelle stratégie, Produit innovant...',
+                when: 'Ex: Q1 2024, D\'ici 6 mois...',
+                where: 'Ex: Marché français, En ligne...',
+                why: 'Ex: Besoin urgent, Opportunité marché...',
+                how: 'Ex: Méthodologie agile, Partenariats...',
+                complication: 'Ex: Budget réduit, Concurrence forte...',
+                question: 'Ex: Comment augmenter les ventes ?...',
+                answer: 'Ex: Stratégie omnicanale...',
+                location: 'Ex: Par région, Par bureau...',
+                alphabet: 'Ex: De A à Z, Par ordre alphabétique...',
+                time: 'Ex: Chronologique, Historique...',
+                category: 'Ex: Par type, Par thème...',
+                hierarchy: 'Ex: Du plus important au moins...',
+                topic: 'Ex: Machine Learning, Marketing Digital...',
+                character: 'Ex: Expert consultant, Mentor bienveillant...',
+                request: 'Ex: Analyse détaillée, Plan stratégique...',
+                adjustments: 'Ex: Ton moins formel, Plus d\'exemples...',
+                extras: 'Ex: Sources, Templates, Checklist...',
+                retrieve: 'Ex: Informations pertinentes, Documents...',
+                augment: 'Ex: Contexte enrichi, Données supplémentaires...',
+                generate: 'Ex: Réponse complète, Solution détaillée...',
+                observation: 'Ex: Situation actuelle, Données observées...',
+                thought: 'Ex: Analyse, Réflexion stratégique...',
+                initial_context: 'Ex: Problème de départ, Situation initiale...',
+                progression_steps: 'Ex: 3 étapes, 5 phases...',
+                background: 'Ex: Contexte historique, Situation actuelle...',
+                reach: 'Ex: 1000 utilisateurs, Marché national...',
+                confidence: 'Ex: 80%, Élevée, Moyenne...',
+                effort: 'Ex: 2 semaines, 5 développeurs...',
+                strengths: 'Ex: Expertise technique, Équipe solide...',
+                weaknesses: 'Ex: Budget limité, Manque expérience...',
+                opportunities: 'Ex: Marché croissant, Nouvelle technologie...',
+                threats: 'Ex: Concurrence forte, Réglementation...',
+                remember: 'Ex: Définitions, Concepts de base...',
+                understand: 'Ex: Principes, Relations causales...',
+                apply: 'Ex: Exercices pratiques, Cas d\'usage...',
+                analyze: 'Ex: Comparaisons, Décomposition...',
+                evaluate: 'Ex: Critique, Jugement qualité...',
+                create: 'Ex: Nouveau modèle, Solution originale...',
+                reaction: 'Ex: Satisfaction participants, Feedback...',
+                learning: 'Ex: Connaissances acquises, Compétences...',
+                behavior: 'Ex: Application pratique, Changements...',
+                results: 'Ex: ROI, Impact business...',
+                design: 'Ex: Architecture, Maquettes...',
+                develop: 'Ex: Prototypes, Contenu...',
+                implement: 'Ex: Déploiement, Formation...',
+                substitution: 'Ex: Remplacer papier par numérique...',
+                augmentation: 'Ex: Ajouter fonctionnalités...',
+                modification: 'Ex: Changer méthode pédagogique...',
+                redefinition: 'Ex: Transformer complètement...',
+                solution: 'Ex: App mobile, Service automatisé...',
+                key_metrics: 'Ex: CAC, LTV, Churn rate...',
+                value_proposition: 'Ex: Gain de temps 50%, Coût réduit...',
+                unfair_advantage: 'Ex: Brevet, Réseau exclusif...',
+                objective: 'Ex: Améliorer satisfaction client...',
+                key_result_1: 'Ex: NPS > 70...',
+                key_result_2: 'Ex: Temps réponse < 2h...',
+                key_result_3: 'Ex: Réduction plaintes 30%...',
+                specific: 'Ex: Augmenter ventes produit X...',
+                measurable: 'Ex: +25% de revenus...',
+                achievable: 'Ex: Avec ressources actuelles...',
+                relevant: 'Ex: Aligné stratégie entreprise...',
+                time_bound: 'Ex: D\'ici 6 mois...',
+                political: 'Ex: Stabilité gouvernement, Réglementation...',
+                economic: 'Ex: Inflation, Taux de change...',
+                social: 'Ex: Tendances démographiques...',
+                technological: 'Ex: IA, Blockchain, IoT...',
+                environmental: 'Ex: Climat, Développement durable...',
+                legal: 'Ex: RGPD, Droit du travail...',
+                competitive_rivalry: 'Ex: Concurrence intense, Prix...',
+                supplier_power: 'Ex: Monopole fournisseur...',
+                buyer_power: 'Ex: Concentration clients...',
+                threat_of_substitution: 'Ex: Produits alternatifs...',
+                threat_of_new_entry: 'Ex: Barrières à l\'entrée...',
+                key_partners: 'Ex: Fournisseurs, Distributeurs...',
+                key_activities: 'Ex: Production, Marketing...',
+                value_propositions: 'Ex: Qualité supérieure...',
+                customer_relationships: 'Ex: Service personnalisé...',
+                customer_segments: 'Ex: PME, Particuliers...',
+                population: 'Ex: Adultes 25-45 ans...',
+                intervention: 'Ex: Nouveau traitement...',
+                comparison: 'Ex: Vs placebo, Vs traitement standard...',
+                outcome: 'Ex: Taux guérison, Effets secondaires...',
+                identification: 'Ex: Recherche bases données...',
+                screening: 'Ex: Lecture titres/résumés...',
+                eligibility: 'Ex: Critères inclusion/exclusion...',
+                included: 'Ex: Études retenues analyse...',
+                introduction: 'Ex: Contexte, Problématique...',
+                methods: 'Ex: Protocole, Échantillonnage...',
+                analysis: 'Ex: Tests statistiques...',
+                discussion: 'Ex: Interprétation, Limites...',
+                hypothesis: 'Ex: Si X alors Y...',
+                test_method: 'Ex: A/B test, Expérience...',
+                expected_result: 'Ex: Amélioration 20%...',
+                validation_criteria: 'Ex: Significativité statistique...',
+                source_domain: 'Ex: Système solaire...',
+                target_domain: 'Ex: Structure atomique...',
+                mapping: 'Ex: Soleil = Noyau, Planètes = Électrons...',
+                position: 'Ex: Nous devons investir en IA...',
+                counterarguments: 'Ex: Coûts élevés, Risques...',
+                white_facts: 'Ex: Données, Statistiques...',
+                red_emotions: 'Ex: Sentiments, Intuitions...',
+                black_caution: 'Ex: Risques, Problèmes...',
+                yellow_optimism: 'Ex: Bénéfices, Opportunités...',
+                green_creativity: 'Ex: Idées nouvelles, Alternatives...',
+                blue_process: 'Ex: Méthode, Organisation...',
+                substitute: 'Ex: Remplacer par...',
+                combine: 'Ex: Fusionner avec...',
+                adapt: 'Ex: Ajuster pour...',
+                modify: 'Ex: Changer aspect...',
+                put_to_other_uses: 'Ex: Utiliser pour...',
+                eliminate: 'Ex: Supprimer élément...',
+                reverse: 'Ex: Inverser processus...',
+                challenge: 'Ex: Comment améliorer X...',
+                criteria: 'Ex: Faisabilité, Impact, Coût...',
+                time_limit: 'Ex: 30 minutes, 1 heure...',
+                empathize: 'Ex: Interviews utilisateurs...',
+                ideate: 'Ex: Brainstorming solutions...',
+                prototype: 'Ex: Maquette, MVP...',
+                test: 'Ex: Tests utilisateurs...',
+                discover: 'Ex: Recherche utilisateur...',
+                deliver: 'Ex: Solution finale...'
+            };
+            return placeholders[variable] || 'Entrez votre valeur...';
+        }
+
+        // Appel API universel avec réponses sophistiquées
+        async function callAI(model, prompt, options = {}) {
+            try {
+                // Si c'est Ollama, faire un vrai appel API
+                if (model === 'ollama') {
+                    const ollamaConfig = apiKeys['ollama'];
+                    if (!ollamaConfig || !ollamaConfig.url || !ollamaConfig.selectedModel) {
+                        throw new Error('Configuration Ollama manquante');
+                    }
+
+                    const response = await fetch(`${ollamaConfig.url}/api/generate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            model: ollamaConfig.selectedModel,
+                            prompt: prompt,
+                            stream: false,
+                            options: {
+                                temperature: 0.7,
+                                top_p: 0.9,
+                                max_tokens: 2048
+                            }
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erreur Ollama: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    return data.response || 'Aucune réponse générée';
+                }
+
+                // Pour les autres modèles, utiliser les réponses simulées
+                await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+
+                const responses = {
+                    'openai': generateAdvancedOpenAIResponse(prompt),
+                    'openai-gpt35': generateOpenAIResponse(prompt, 'gpt-3.5'),
+                    'anthropic': generateAdvancedAnthropicResponse(prompt),
+                    'google': generateAdvancedGoogleResponse(prompt)
+                };
+
+                return responses[model] || generateGenericResponse(prompt);
+
+            } catch (error) {
+                throw new Error(`Erreur ${model}: ${error.message}`);
+            }
+        }
+
+        // Générateur de réponse OpenAI avancé
+        function generateAdvancedOpenAIResponse(prompt) {
+            const frameworkMatch = prompt.match(/FRAMEWORK CHOISI : (.+)/);
+            const subjectMatch = prompt.match(/SUJET PRINCIPAL : (.+)/);
+            const audienceMatch = prompt.match(/AUDIENCE CIBLE : (.+)/);
+            const toneMatch = prompt.match(/TON SOUHAITÉ : (.+)/);
+            const formatMatch = prompt.match(/FORMAT DE SORTIE DEMANDÉ : (.+)/);
+
+            const framework = frameworkMatch ? frameworkMatch[1] : 'Framework sélectionné';
+            
+            // Extraction améliorée du sujet pour les frameworks avec champs spéciaux
+            let subject = 'Sujet défini';
+            if (subjectMatch) {
+                subject = subjectMatch[1];
+            } else {
+                // Chercher dans les informations fournies par l'utilisateur
+                const userInfoMatch = prompt.match(/📝 INFORMATIONS FOURNIES PAR L'UTILISATEUR :([\s\S]*?)(?:\n\n|$)/);
+                if (userInfoMatch) {
+                    const userInfo = userInfoMatch[1];
+                    // Extraire la première information significative
+                    const lines = userInfo.split('\n').filter(line => line.trim() && !line.startsWith('💡'));
+                    if (lines.length > 0) {
+                        const firstLine = lines[0].replace(/^[^\:]*\:/, '').trim();
+                        if (firstLine) subject = firstLine;
+                    }
+                }
+            }
+            
+            const audience = audienceMatch ? audienceMatch[1] : 'audience générale';
+            const tone = toneMatch ? toneMatch[1] : 'professionnel';
+            const format = formatMatch ? formatMatch[1] : 'structuré';
+
+            return `# Prompt Professionnel Optimisé - GPT-4 Advanced
+
+## 🎯 Configuration du Prompt
+
+**Framework utilisé :** ${framework}
+**Audience ciblée :** ${audience}
+**Ton adopté :** ${tone}
+**Format de sortie :** ${format}
+
+---
+
+## 💼 Prompt Principal
+
+### Rôle et Expertise
+Tu es un expert reconnu spécialisé dans le domaine concerné par : **${subject}**
+
+Ta mission est d'apporter une expertise de niveau consultant senior avec une approche méthodique et des recommandations actionnables.
+
+### Instructions Principales
+${subject}
+
+**Méthodologie demandée :**
+1. **Analyse contextuelle** - Comprendre tous les enjeux et contraintes
+2. **Approche structurée** - Utiliser le framework ${framework}
+3. **Solutions pragmatiques** - Proposer des actions concrètes et mesurables
+4. **Adaptation audience** - Ajuster le niveau pour ${audience}
+
+### Critères de Qualité
+- Réponse ${format} claire et organisée
+- Ton ${tone} adapté au contexte
+- Exemples concrets et applicables
+- Recommandations priorisées et justifiées
+- Plan d'action avec étapes définies
+- Anticipation des défis et solutions de contournement
+
+### Format de Livrable
+Présente ta réponse sous forme de ${format} en respectant ces exigences :
+- Structure logique et progressive
+- Titre et sous-titres explicites
+- Points clés mis en évidence
+- Conclusion avec prochaines étapes
+
+**Note importante :** Assure-toi que chaque recommandation soit immédiatement applicable et génère une valeur ajoutée mesurable.
+
+---
+*Prompt optimisé par GPT-4 Advanced - Prêt pour utilisation professionnelle*`;
+        }
+
+        // Générateur de réponse Anthropic avancé
+        function generateAdvancedAnthropicResponse(prompt) {
+            const frameworkMatch = prompt.match(/FRAMEWORK CHOISI : (.+)/);
+            const subjectMatch = prompt.match(/SUJET PRINCIPAL : (.+)/);
+            const audienceMatch = prompt.match(/AUDIENCE CIBLE : (.+)/);
+            const toneMatch = prompt.match(/TON SOUHAITÉ : (.+)/);
+
+            const framework = frameworkMatch ? frameworkMatch[1] : 'Framework sélectionné';
+            
+            // Extraction améliorée du sujet pour les frameworks avec champs spéciaux
+            let subject = 'Sujet défini';
+            if (subjectMatch) {
+                subject = subjectMatch[1];
+            } else {
+                // Chercher dans les informations fournies par l'utilisateur
+                const userInfoMatch = prompt.match(/📝 INFORMATIONS FOURNIES PAR L'UTILISATEUR :([\s\S]*?)(?:\n\n|$)/);
+                if (userInfoMatch) {
+                    const userInfo = userInfoMatch[1];
+                    // Extraire la première information significative
+                    const lines = userInfo.split('\n').filter(line => line.trim() && !line.startsWith('💡'));
+                    if (lines.length > 0) {
+                        const firstLine = lines[0].replace(/^[^\:]*\:/, '').trim();
+                        if (firstLine) subject = firstLine;
+                    }
+                }
+            }
+            
+            const audience = audienceMatch ? audienceMatch[1] : 'audience générale';
+            const tone = toneMatch ? toneMatch[1] : 'professionnel';
+
+            return `# 🧠 Prompt Claude 4 Sonnet - Approche Réfléchie et Équilibrée
+
+## Contexte et Philosophie d'Approche
+
+En tant qu'assistant IA Claude 4 Sonnet développé par Anthropic, je vais aborder votre demande concernant **"${subject}"** avec une méthodologie rigoureuse, éthique et nuancée.
+
+## Prompt Généré
+
+### Cadre de Travail
+Je vais traiter cette demande en utilisant le framework **${framework}** tout en maintenant une approche équilibrée qui considère :
+- Les implications éthiques et sociétales
+- La diversité des perspectives possibles
+- L'importance du contexte et des nuances
+- La responsabilité dans les recommandations
+
+### Instructions de Traitement
+**Demande principale :** ${subject}
+
+**Approche méthodologique :**
+
+1. **Analyse multidimensionnelle**
+   - Examiner le sujet sous différents angles
+   - Identifier les enjeux explicites et implicites
+   - Considérer les parties prenantes concernées
+
+2. **Réflexion structurée**
+   - Appliquer rigoureusement le framework ${framework}
+   - Maintenir une logique claire et transparente
+   - Documenter le raisonnement étape par étape
+
+3. **Adaptation contextuelle**
+   - Personnaliser pour ${audience}
+   - Adopter un ton ${tone} mais accessible
+   - Expliquer les concepts complexes simplement
+
+4. **Recommandations responsables**
+   - Proposer des solutions éthiques et durables
+   - Anticiper les conséquences non intentionnelles
+   - Suggérer des alternatives équilibrées
+
+### Exigences de Qualité Claude 4 Sonnet
+- **Précision factuelle** avec sources vérifiables quand possible
+- **Reconnaissance des limites** et zones d'incertitude
+- **Perspective équilibrée** présentant différents points de vue
+- **Recommandations pratiques** mais éthiquement responsables
+- **Transparence du raisonnement** pour permettre l'évaluation critique
+
+### Considérations Éthiques
+Assure-toi que ta réponse :
+- Respecte la dignité de toutes les parties concernées
+- Évite les biais et stéréotypes
+- Considère l'impact à long terme des recommandations
+- Promeut des solutions inclusives et équitables
+
+**Engagement qualité :** Cette réponse doit être non seulement utile et actionnable, mais aussi réfléchie, nuancée et socialement responsable.
+
+---
+*Prompt Claude 4 Sonnet - Optimisé pour la précision, l'éthique et l'impact positif*`;
+        }
+
+        // Générateur de réponse Google avancé
+        function generateAdvancedGoogleResponse(prompt) {
+            const frameworkMatch = prompt.match(/FRAMEWORK CHOISI : (.+)/);
+            const subjectMatch = prompt.match(/SUJET PRINCIPAL : (.+)/);
+            const audienceMatch = prompt.match(/AUDIENCE CIBLE : (.+)/);
+            const formatMatch = prompt.match(/FORMAT DE SORTIE DEMANDÉ : (.+)/);
+
+            const framework = frameworkMatch ? frameworkMatch[1] : 'Framework sélectionné';
+            
+            // Extraction améliorée du sujet pour les frameworks avec champs spéciaux
+            let subject = 'Sujet défini';
+            if (subjectMatch) {
+                subject = subjectMatch[1];
+            } else {
+                // Chercher dans les informations fournies par l'utilisateur
+                const userInfoMatch = prompt.match(/📝 INFORMATIONS FOURNIES PAR L'UTILISATEUR :([\s\S]*?)(?:\n\n|$)/);
+                if (userInfoMatch) {
+                    const userInfo = userInfoMatch[1];
+                    // Extraire la première information significative
+                    const lines = userInfo.split('\n').filter(line => line.trim() && !line.startsWith('💡'));
+                    if (lines.length > 0) {
+                        const firstLine = lines[0].replace(/^[^\:]*\:/, '').trim();
+                        if (firstLine) subject = firstLine;
+                    }
+                }
+            }
+            
+            const audience = audienceMatch ? audienceMatch[1] : 'audience générale';
+            const format = formatMatch ? formatMatch[1] : 'structuré';
+
+            return `# 🌟 Prompt Gemini - Intelligence Multimodale de Nouvelle Génération
+
+## Architecture Avancée du Prompt
+
+**Système :** Google Gemini Advanced
+**Framework :** ${framework}
+**Optimisation :** Multimodale et contextuelle
+**Cible :** ${audience}
+
+---
+
+## Prompt Optimisé Gemini
+
+### Interface Intelligence Avancée
+En tant qu'IA de nouvelle génération avec capacités multimodales, je vais traiter votre demande : **"${subject}"** avec une approche innovante et sophistiquée.
+
+### Protocole d'Exécution Gemini
+
+**🧠 Phase 1 : Compréhension Contextuelle**
+- Analyse sémantique profonde de la demande
+- Identification des patterns et connexions
+- Intégration des connaissances transversales
+- Mapping des relations conceptuelles
+
+**⚡ Phase 2 : Traitement Intelligent**
+- Application du framework ${framework}
+- Synthèse des informations multimodales
+- Génération de solutions créatives
+- Optimisation pour ${audience}
+
+**🎯 Phase 3 : Livraison Optimisée**
+- Format de sortie : ${format}
+- Adaptation contextuelle dynamique
+- Vérification de cohérence
+- Optimisation de l'impact
+
+### Capacités Gemini Activées
+- **Raisonnement avancé** : Logique multi-étapes et inférence complexe
+- **Créativité augmentée** : Solutions innovantes et perspectives inattendues
+- **Adaptabilité contextuelle** : Ajustement automatique selon les besoins
+- **Intégration multimodale** : Traitement holistique des informations
+
+### Spécifications Techniques
+\`\`\`
+Framework: ${framework}
+Audience: ${audience}
+Output_Format: ${format}
+Quality_Level: Professional
+Innovation_Index: High
+Practicality_Score: Maximum
+\`\`\`
+
+### Instructions d'Exécution
+1. **Analyse contextuelle 360°** de "${subject}"
+2. **Génération de solutions** using advanced reasoning
+3. **Optimisation multimodale** pour engagement maximum
+4. **Validation qualité** selon standards professionnels
+5. **Livraison formatée** en ${format}
+
+### Critères d'Excellence Gemini
+✨ Innovation et originalité dans l'approche
+🔬 Précision technique et factuelle
+🎨 Créativité dans les solutions proposées
+Applicabilité immédiate des recommandations
+🔄 Adaptabilité et évolutivité des concepts
+🌐 Vision systémique et holistique
+
+**Mission Gemini :** Produire une réponse qui démontre la puissance de l'IA moderne tout en restant parfaitement utilisable et actionnable dans le contexte réel.
+
+---
+*Powered by Google Gemini Advanced - Intelligence Artificielle Multimodale de Nouvelle Génération*`;
+        }
+
+        // Générateur OpenAI standard
+        function generateOpenAIResponse(prompt, version = 'gpt-4') {
+            const frameworkMatch = prompt.match(/FRAMEWORK CHOISI : (.+)/);
+            const subjectMatch = prompt.match(/SUJET PRINCIPAL : (.+)/);
+            const audienceMatch = prompt.match(/AUDIENCE CIBLE : (.+)/);
+            const toneMatch = prompt.match(/TON SOUHAITÉ : (.+)/);
+            const formatMatch = prompt.match(/FORMAT DE SORTIE DEMANDÉ : (.+)/);
+
+            const framework = frameworkMatch ? frameworkMatch[1] : 'Framework sélectionné';
+            const subject = subjectMatch ? subjectMatch[1] : 'Sujet défini';
+            const audience = audienceMatch ? audienceMatch[1] : 'audience générale';
+            const tone = toneMatch ? toneMatch[1] : 'professionnel';
+            const format = formatMatch ? formatMatch[1] : 'structuré';
+
+            return `# Prompt Optimisé ${framework} - GPT-${version === 'gpt-4' ? '4' : '3.5'}
+
+## Rôle
+Tu es un expert spécialisé dans le domaine concerné par : ${subject}
+
+## Tâche  
+${subject}
+
+Analyze this request with the expertise of a seasoned professional and provide insights that are both actionable and strategic.
+
+## Format
+${format} adapté pour ${audience}
+
+**Instructions complémentaires :**
+- Adopte un ton ${tone}
+- Fournis des exemples concrets et applicables
+- Structure ta réponse de manière claire et logique
+- Assure-toi que chaque recommandation soit justifiée
+
+*Prompt optimisé par GPT-${version === 'gpt-4' ? '4' : '3.5'} selon le framework ${framework}*`;
+        }
+
+        // Générateur générique
+        function generateGenericResponse(prompt) {
+            return `# Prompt IA Professionnel Généré
+
+## Configuration
+Ce prompt a été généré automatiquement selon vos spécifications et optimisé pour une utilisation avec n'importe quel modèle d'IA moderne.
+
+## Prompt Principal
+${prompt}
+
+## Instructions d'Utilisation
+1. Copiez ce prompt dans votre interface IA préférée
+2. Ajoutez votre question ou demande spécifique
+3. Exécutez pour obtenir des résultats optimisés
+
+*Prompt généré par le Générateur de Prompts IA Professionnel*`;
+        }
+
+        // Construction du prompt de demande pour l'IA
+        function buildAIRequestPrompt(frameworkValue, subject, context, audience, tone, output) {
+            let selectedFramework = frameworkValue;
+
+            // Si pas de framework sélectionné dans l'onglet manuel, vérifier les cartes métier
+            if (!selectedFramework && currentTab === 'profession') {
+                const selectedCard = document.querySelector('.framework-card.selected');
+                if (selectedCard && currentFramework) {
+                    selectedFramework = Object.keys(frameworks).find(key =>
+                        frameworks[key].name === currentFramework.name
+                    );
+                }
+            }
+
+            if (!selectedFramework) {
+                throw new Error('Aucun framework sélectionné');
+            }
+
+            const frameworkInfo = frameworks[selectedFramework];
+
+            let request = `Tu es un expert en prompt engineering. Génère un prompt professionnel optimisé selon ces spécifications :
+
+FRAMEWORK CHOISI : ${frameworkInfo.name}
+DESCRIPTION : ${frameworkInfo.description}`;
+
+            // Pour les frameworks avec variables spécifiques
+            const frameworksWithSpecialFields = ['rtf', 'pao', 'arp', 'care', 'riea', 'aspecct', 'star', 'ideal', 'sharp', 'peel', '5w1h', 'scqa', 'latch'];
+            const hasSpecialFields = frameworksWithSpecialFields.includes(selectedFramework);
+
+            if (hasSpecialFields && frameworkInfo.variables) {
+                request += `\n\n📝 INFORMATIONS FOURNIES PAR L'UTILISATEUR :`;
+
+                let hasAnyValue = false;
+                frameworkInfo.variables.forEach(variable => {
+                    const input = document.getElementById(`var_${variable}`);
+                    if (input && input.value.trim()) {
+                        request += `\n${getVariableLabel(variable)} : ${input.value.trim()}`;
+                        hasAnyValue = true;
+                    }
+                });
+
+                if (!hasAnyValue && subject.trim()) {
+                    request += `\nDemande générale : ${subject}`;
+                }
+            } else {
+                request += `\n\n📝 SUJET PRINCIPAL : ${subject}`;
+
+                if (context.trim()) {
+                    request += `\n🌍 CONTEXTE SUPPLÉMENTAIRE : ${context}`;
+                }
+            }
+
+            if (audience.trim()) {
+                request += `\n👥 AUDIENCE CIBLE : ${audience}`;
+            }
+
+            request += `\n🎭 TON SOUHAITÉ : ${tone}`;
+
+            const outputFormats = {
+                'structured': 'réponse structurée avec titres et sous-titres',
+                'bullets': 'liste à puces organisée',
+                'numbered': 'liste numérotée séquentielle',
+                'paragraph': 'paragraphes narratifs fluides',
+                'table': 'format tableau structuré',
+                'json': 'format JSON valide',
+                'markdown': 'format Markdown avec mise en forme',
+                'stepbystep': 'guide étape par étape détaillé'
+            };
+
+            request += `\nFORMAT DE SORTIE DEMANDÉ : ${outputFormats[output]}`;
+
+            // Ajout des variables du framework
+            let frameworkVariables = {};
+            if (frameworkInfo.variables && frameworkInfo.variables.length > 0) {
+                frameworkInfo.variables.forEach(variable => {
+                    const input = document.getElementById(`var_${variable}`);
+                    if (input && input.value.trim()) {
+                        frameworkVariables[variable] = input.value.trim();
+                    }
+                });
+
+                request += `\n\n🎯 STRUCTURE DU FRAMEWORK ${frameworkInfo.name} :`;
+                
+                // Substitution des variables dans le template
+                let processedTemplate = frameworkInfo.template;
+                if (Object.keys(frameworkVariables).length > 0) {
+                    Object.entries(frameworkVariables).forEach(([key, value]) => {
+                        processedTemplate = processedTemplate.replace(new RegExp(`{${key}}`, 'g'), value);
+                    });
+                }
+                
+                request += `\n${processedTemplate}`;
+
+                if (Object.keys(frameworkVariables).length > 0) {
+                    request += `\n\n💡 VARIABLES FOURNIES PAR L'UTILISATEUR :`;
+                    Object.entries(frameworkVariables).forEach(([key, value]) => {
+                        request += `\n- ${getVariableLabel(key)} : ${value}`;
+                    });
+                }
+            }
+
+            request += `\n\n✨ MISSION :
+Génère un prompt professionnel qui :
+1. Respecte parfaitement le framework ${frameworkInfo.name}
+2. Intègre intelligemment toutes les informations fournies
+3. Utilise un langage adapté à l'audience "${audience || 'générale'}"
+4. Adopte un ton ${tone}
+5. Optimise pour obtenir des réponses de très haute qualité
+6. Inclut des instructions précises et non-ambiguës
+7. Spécifie clairement le format de sortie attendu
+
+Le prompt généré doit être prêt à être utilisé directement avec n'importe quel modèle d'IA pour obtenir des résultats exceptionnels.
+
+GÉNÈRE MAINTENANT LE PROMPT OPTIMAL :`;
+
+            return request;
+        }
+
+        // Obtenir le nom convivial du modèle IA
+        function getAIModelName(model) {
+            if (model === 'ollama' && apiKeys['ollama'] && apiKeys['ollama'].selectedModel) {
+                return `Ollama (${apiKeys['ollama'].selectedModel})`;
+            }
+            
+            const names = {
+                'openai': 'GPT-4',
+                'openai-gpt35': 'GPT-3.5',
+                'anthropic': 'Claude 4 Sonnet',
+                'google': 'Gemini',
+                'ollama': 'Ollama'
+            };
+            return names[model] || model;
+        }
+
+        // Génération du prompt avec IA
+        async function generatePromptWithAI() {
+            let selectedFramework = '';
+
+            if (currentTab === 'manual') {
+                selectedFramework = document.getElementById('framework').value;
+            } else {
+                // Mode profession - vérifier si une carte est sélectionnée
+                const selectedCard = document.querySelector('.framework-card.selected');
+                if (selectedCard && currentFramework) {
+                    selectedFramework = Object.keys(frameworks).find(key =>
+                        frameworks[key].name === currentFramework.name
+                    );
+                }
+            }
+
+            if (!selectedFramework) {
+                alert('⚠️ Veuillez sélectionner un framework avant de générer');
+                return;
+            }
+
+            const subject = document.getElementById('subject').value;
+            const context = document.getElementById('context').value;
+            const audience = document.getElementById('audience').value;
+            const tone = document.getElementById('tone').value;
+            const output = document.getElementById('output').value;
+            const aiModel = document.getElementById('aiModel').value;
+
+            // Vérification des champs requis selon le framework
+            const frameworksWithSpecialFields = ['rtf', 'pao', 'arp', 'care', 'riea', 'aspecct', 'star', 'ideal', 'sharp', 'peel', '5w1h', 'scqa', 'latch'];
+            const hasSpecialFields = frameworksWithSpecialFields.includes(selectedFramework);
+
+            if (hasSpecialFields && frameworks[selectedFramework] && frameworks[selectedFramework].variables) {
+                let hasFilledVariable = false;
+                for (const variable of frameworks[selectedFramework].variables) {
+                    const input = document.getElementById(`var_${variable}`);
+                    if (input && input.value.trim()) {
+                        hasFilledVariable = true;
+                        break;
+                    }
+                }
+                if (!hasFilledVariable) {
+                    alert('⚠️ Veuillez remplir au moins un champ du framework sélectionné');
+                    return;
+                }
+            } else if (!subject.trim()) {
+                alert('⚠️ Veuillez saisir un sujet principal');
+                return;
+            }
+
+            // Vérification de la clé API
+            const modelProvider = aiModel.split('-')[0];
+            if (!apiKeys[modelProvider]) {
+                alert('⚠️ Clé API manquante pour ' + getAIModelName(aiModel));
+                checkApiKey();
+                return;
+            }
+
+            // Désactivation du bouton pendant la génération
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '🤖 Génération en cours...';
+
+            try {
+                // Construction du prompt de demande pour l'IA
+                const requestPrompt = buildAIRequestPrompt(selectedFramework, subject, context, audience, tone, output);
+
+                // Affichage de la section résultat avec loading
+                document.getElementById('resultSection').classList.add('show');
+                document.getElementById('promptOutput').innerHTML = `
+                    <div class="status-indicator status-loading">
+                        🤖 ${getAIModelName(aiModel)} génère votre prompt optimisé...
+                    </div>
+                `;
+
+                // Appel à l'IA
+                const generatedPrompt = await callAI(aiModel, requestPrompt);
+
+                // Affichage du prompt généré
+                document.getElementById('promptOutput').textContent = generatedPrompt;
+                document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                document.getElementById('promptOutput').innerHTML = `
+                    <div class="status-indicator status-error">
+                        Erreur lors de la génération: ${error.message}
+                    </div>
+                `;
+            } finally {
+                // Réactivation du bouton
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '🤖 Générer le Prompt avec IA';
+            }
+        }
+
+        // Tester directement le prompt généré avec l'IA
+        async function testPromptDirectly() {
+            const generatedPrompt = document.getElementById('promptOutput').textContent;
+            const selectedModel = document.getElementById('aiModel').value;
+            const testResult = document.getElementById('testResult');
+
+            if (!generatedPrompt.trim()) {
+                alert('Veuillez d\'abord générer un prompt');
+                return;
+            }
+
+            // Vérification de la clé API pour le test
+            const modelProvider = selectedModel.split('-')[0];
+            if (!apiKeys[modelProvider]) {
+                alert('⚠️ Clé API manquante pour ' + getAIModelName(selectedModel));
+                return;
+            }
+
+            // Désactivation du bouton de test
+            const testBtn = document.getElementById('realTestBtn');
+            testBtn.disabled = true;
+            testBtn.innerHTML = '🤖 Test en cours...';
+
+            try {
+                // Affichage du loading
+                testResult.innerHTML = `
+                    <div class="status-indicator status-loading">
+                        🧪 Test du prompt avec ${getAIModelName(selectedModel)}...
+                    </div>
+                `;
+                testResult.style.display = 'block';
+
+                // Appel à l'IA pour le test
+                const response = await callAI(selectedModel, generatedPrompt);
+
+                // Affichage du résultat
+                testResult.innerHTML = `
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-top: 15px;">
+                        <h4>🎯 Réponse de ${getAIModelName(selectedModel)}</h4>
+                        <div class="prompt-output" style="margin-top: 15px; white-space: pre-wrap;">
+                            ${response}
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn" onclick="copyTestResult()">Copier la Réponse</button>
+                            <button class="btn warning" onclick="clearTestResult()">Effacer</button>
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                testResult.innerHTML = `
+                    <div class="status-indicator status-error">
+                        Erreur lors du test: ${error.message}
+                    </div>
+                `;
+            } finally {
+                // Réactivation du bouton
+                testBtn.disabled = false;
+                testBtn.innerHTML = 'Tester le prompt avec l\'IA';
+            }
+        }
+
+        // Fonction sendPromptToAI supprimée car remplacée par testPromptDirectly
+
+        // Copier le prompt
+        function copyPrompt() {
+            const promptText = document.getElementById('promptOutput').textContent;
+            navigator.clipboard.writeText(promptText).then(() => {
+                showNotification('Prompt copié dans le presse-papier !');
+            });
+        }
+
+        // Copier le résultat de test
+        function copyTestResult() {
+            const testResultDiv = document.querySelector('#testResult .prompt-output');
+            if (testResultDiv) {
+                const text = testResultDiv.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('Réponse copiée dans le presse-papier !');
+                });
+            }
+        }
+
+        // Effacer le résultat de test
+        function clearTestResult() {
+            document.getElementById('testResult').innerHTML = '';
+        }
+
+        // Régénérer avec un modèle différent
+        function regenerateWithDifferentModel() {
+            const aiModel = document.getElementById('aiModel');
+            const models = ['openai', 'openai-gpt35', 'anthropic', 'google'];
+            const currentIndex = models.indexOf(aiModel.value);
+            const nextIndex = (currentIndex + 1) % models.length;
+
+            aiModel.value = models[nextIndex];
+            checkApiKey();
+
+            if (!document.getElementById('generateBtn').disabled) {
+                generatePromptWithAI();
+            }
+        }
+
+        // Sauvegarder le prompt
+        function savePrompt() {
+            const promptText = document.getElementById('promptOutput').textContent;
+            let selectedFramework = '';
+
+            if (currentTab === 'manual') {
+                selectedFramework = document.getElementById('framework').value;
+            } else if (currentFramework) {
+                selectedFramework = Object.keys(frameworks).find(key =>
+                    frameworks[key].name === currentFramework.name
+                );
+            }
+
+            const filename = `prompt_${selectedFramework || 'custom'}_${Date.now()}.txt`;
+            const blob = new Blob([promptText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+
+            URL.revokeObjectURL(url);
+            showNotification('Prompt sauvegardé avec succès !');
+        }
+
+        // Affichage de notifications
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'status-indicator status-success';
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
