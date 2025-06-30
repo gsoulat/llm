@@ -2,3 +2,4 @@
 .env.example
 non/
 .DS_store
+.venv/
