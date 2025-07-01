@@ -1,4 +1,4 @@
-# 10. Outils de Développement Assisté par IA
+# 12. Outils de Développement Assisté par IA
 
 ## Introduction au "Vibe Coding"
 

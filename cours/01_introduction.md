@@ -39,7 +39,12 @@ Alors que des services comme ChatGPT sont populaires, faire tourner un LLM sur v
 
 **Ollama** est l'outil qui change la donne. Il agit comme un "Docker pour les LLMs", masquant toute la complexité technique.
 
-http://googleusercontent.com/image_generation_content/0
+```mermaid
+graph TD
+    A[Utilisateur] --> B{Votre Application};
+    B --> C[API Ollama];
+    C <--> D[LLM Local (Llama 3, Mistral, ...)];
+```
 
 Avec Ollama, vous pouvez :
 * **Télécharger et exécuter** des modèles de pointe (Llama 3, Mistral, etc.) en une seule commande.
@@ -54,7 +59,7 @@ Il rend l'expérimentation avec les LLMs aussi simple que de lancer une applicat
 
 Pour bien comprendre comment les pièces s'assemblent, voici l'architecture typique d'une application qui utilise un LLM local.
 
-![Diagramme de l'architecture d'une application LLM locale](https://i.imgur.com/37nCyBR.png)
+![Diagramme de l'architecture d'une application LLM locale](./images/cloud_IA.png)
 
 * **Votre Application (Frontend/Backend) :** C'est l'interface avec laquelle l'utilisateur interagit (un site web, un script, etc.).
 * **Ollama & le LLM :** Le "cerveau" qui tourne sur votre machine et traite les requêtes.
