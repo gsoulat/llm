@@ -24,7 +24,7 @@ Imaginez un cerveau numérique ultra-puissant, entraîné en lisant une biblioth
 
 Alors que des services comme ChatGPT sont populaires, faire tourner un LLM sur votre propre ordinateur ("en local") offre des avantages stratégiques décisifs.
 
-![Tableau comparatif Cloud vs Local](https://i.imgur.com/T00aV78.png)
+![Tableau comparatif Cloud vs Local](./images/cloud_IA.png)
 
 | Aspect              | Services Cloud (ChatGPT, Claude, etc.)         | LLMs en Local (avec Ollama)                                  |
 | :------------------ | :--------------------------------------------- | :----------------------------------------------------------- |
@@ -59,7 +59,7 @@ Il rend l'expérimentation avec les LLMs aussi simple que de lancer une applicat
 
 Pour bien comprendre comment les pièces s'assemblent, voici l'architecture typique d'une application qui utilise un LLM local.
 
-![Diagramme de l'architecture d'une application LLM locale](./images/cloud_IA.png)
+![Diagramme de l'architecture d'une application LLM locale](./images/llm_archi.png)
 
 * **Votre Application (Frontend/Backend) :** C'est l'interface avec laquelle l'utilisateur interagit (un site web, un script, etc.).
 * **Ollama & le LLM :** Le "cerveau" qui tourne sur votre machine et traite les requêtes.
