@@ -2,9 +2,6 @@
 
 
 import gradio as gr
-
-# Ajouter le dossier correction au path pour importer allergene
-# sys.path.append(os.path.join(os.path.dirname(__file__), "correction"))
 from allergene import chatbot_pizza_allergens
 
 
@@ -15,10 +12,8 @@ def respond_to_user(message, history):
     if not message:
         return "", history
 
-    # Obtenir la réponse du chatbot
     response = chatbot_pizza_allergens(message)
 
-    # Ajouter à l'historique
     history.append((message, response))
 
     return "", history
