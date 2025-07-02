@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 import gradio as gr
 from allergene import chatbot_pizza_allergens
 
@@ -45,8 +42,6 @@ def create_interface():
         with gr.Row():
             submit = gr.Button("Envoyer", variant="primary")
             clear = gr.Button("Effacer")
-
-        # Exemples de questions
         gr.Examples(
             examples=[
                 "Quels sont les allergènes dans la pizza Margherita ?",
@@ -58,7 +53,6 @@ def create_interface():
             inputs=msg,
         )
 
-        # Gestion des événements
         msg.submit(respond_to_user, [msg, chatbot], [msg, chatbot])
         submit.click(respond_to_user, [msg, chatbot], [msg, chatbot])
         clear.click(lambda: (None, []), None, [msg, chatbot])
@@ -67,7 +61,6 @@ def create_interface():
 
 
 if __name__ == "__main__":
-    # Créer et lancer l'interface
     interface = create_interface()
     interface.launch(
         server_name="127.0.0.1", server_port=7860, share=False, inbrowser=True

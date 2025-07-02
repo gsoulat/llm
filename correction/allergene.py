@@ -110,11 +110,17 @@ Réponds de façon claire et précise. Si tu n'es pas sûr, dis-le.
 IMPORTANT: Recommande toujours de vérifier avec le restaurant en cas d'allergie grave.
 """
 
-    # Appel au LLM
     data = {
         "model": LLM_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": [
+            {
+                "role": "system",
+                "content": "Tu es un assistant spécialisé dans la pizza...,Toutes les pizzas contiennent une pate fait a base de gluten. tu peux parler uniquement de pizza, d'ingrédients de pizza et d'allergènes liés à la pizza. Si on te pose une question qui ne concerne pas ces sujets, réponds poliment que tu ne peux que discuter de pizza, d'ingrédients et d'allergènes. ",
+            },
+            {"role": "user", "content": prompt},
+        ],
         "stream": False,
+        "temperature": 0.1,
     }
 
     try:
@@ -125,9 +131,6 @@ IMPORTANT: Recommande toujours de vérifier avec le restaurant en cas d'allergie
             return f"Erreur: {response.text}"
     except Exception as e:
         return f"Erreur de connexion: {e}"
-
-
-# --- 6. Interface en ligne de commande ---
 
 
 def main():
